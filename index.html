@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .result {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+            position: relative;
+        }
+        
+        .result h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-right: 10px;
+        }
+        
+        .copy-btn {
+            background-color: #e1e1e1;
+            color: #333;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .copy-btn.copied {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .buttons-container button {
+            flex: 1;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+            padding: 5px;
+        }
+        
+        .formula-settings {
+            margin-bottom: 20px;
+        }
+        
+        .formula-settings label {
+            margin-bottom: 5px;
+        }
+        
+        .formula-settings input {
+            margin-bottom: 15px;
+        }
+        
+        .save-settings {
+            background-color: #27ae60;
+        }
+        
+        .save-settings:hover {
+            background-color: #219653;
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор</h1>
+        
+        <div class="input-group">
+            <label for="amount">Введите сумму:</label>
+            <input type="number" id="amount" placeholder="Введите число" min="0" step="any">
+        </div>
+        
+        <div class="result">
+            <h3>Результат:</h3>
+            <span class="result-value" id="result">0.00 ₽</span>
+            <button class="copy-btn" id="copy-btn">Копировать</button>
+        </div>
+        
+        <div class="buttons-container">
+            <button id="settings-btn">Изменить параметры расчета</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Настройки расчета</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="formula-settings">
+                <p>Текущая формула: <strong>(сумма × <span id="current-multiplier">15</span> + <span id="current-percent">30</span>%) + <span id="current-fixed">50</span> ₽</strong></p>
+                
+                <label for="multiplier">Множитель:</label>
+                <input type="number" id="multiplier" placeholder="Введите множитель" min="0" step="any">
+                
+                <label for="percent">Процент:</label>
+                <input type="number" id="percent" placeholder="Введите процент" min="0" step="any">
+                
+                <label for="fixed-amount">Фиксированная сумма:</label>
+                <input type="number" id="fixed-amount" placeholder="Введите фиксированную сумму" min="0" step="any">
+            </div>
+            
+            <button class="save-settings" id="save-settings">Сохранить настройки</button>
+        </div>
+    </div>
+    
+    <script>
+        // Получаем элементы DOM
+        const amountInput = document.getElementById('amount');
+        const resultElement = document.getElementById('result');
+        const copyBtn = document.getElementById('copy-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const multiplierInput = document.getElementById('multiplier');
+        const percentInput = document.getElementById('percent');
+        const fixedAmountInput = document.getElementById('fixed-amount');
+        const currentMultiplierSpan = document.getElementById('current-multiplier');
+        const currentPercentSpan = document.getElementById('current-percent');
+        const currentFixedSpan = document.getElementById('current-fixed');
+        
+        // Параметры формулы (значения по умолчанию)
+        let formulaSettings = {
+            multiplier: 15,
+            percent: 30,
+            fixedAmount: 50
+        };
+        
+        // Загружаем сохраненные настройки из localStorage
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('formulaSettings');
+            if (savedSettings) {
+                formulaSettings = JSON.parse(savedSettings);
+            }
+            updateCurrentFormulaDisplay();
+        }
+        
+        // Сохраняем настройки в localStorage
+        function saveSettings() {
+            localStorage.setItem('formulaSettings', JSON.stringify(formulaSettings));
+            updateCurrentFormulaDisplay();
+        }
+        
+        // Обновляем отображение текущей формулы
+        function updateCurrentFormulaDisplay() {
+            currentMultiplierSpan.textContent = formulaSettings.multiplier;
+            currentPercentSpan.textContent = formulaSettings.percent;
+            currentFixedSpan.textContent = formulaSettings.fixedAmount;
+        }
+        
+        // Вычисляем результат по формуле
+        function calculateResult(amount) {
+            if (!amount || isNaN(amount) || amount <= 0) return 0;
+            
+            const multiplied = amount * formulaSettings.multiplier;
+            const withPercent = multiplied * (1 + formulaSettings.percent / 100);
+            const finalAmount = withPercent + formulaSettings.fixedAmount;
+            
+            return finalAmount.toFixed(2);
+        }
+        
+        // Обновляем отображение результата
+        function updateResult() {
+            const amount = parseFloat(amountInput.value);
+            const result = calculateResult(amount);
+            resultElement.textContent = `${result} ₽`;
+        }
+        
+        // Копируем результат в буфер обмена
+        function copyResultToClipboard() {
+            const resultText = resultElement.textContent;
+            navigator.clipboard.writeText(resultText)
+                .then(() => {
+                    copyBtn.textContent = 'Скопировано!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Копировать';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Ошибка при копировании: ', err);
+                    copyBtn.textContent = 'Ошибка!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Копировать';
+                    }, 2000);
+                });
+        }
+        
+        // Открываем модальное окно с текущими настройками
+        function openSettingsModal() {
+            multiplierInput.value = formulaSettings.multiplier;
+            percentInput.value = formulaSettings.percent;
+            fixedAmountInput.value = formulaSettings.fixedAmount;
+            settingsModal.style.display = 'flex';
+        }
+        
+        // Закрываем модальное окно
+        function closeSettingsModal() {
+            settingsModal.style.display = 'none';
+        }
+        
+        // Сохраняем новые настройки
+        function saveNewSettings() {
+            formulaSettings = {
+                multiplier: parseFloat(multiplierInput.value) || 0,
+                percent: parseFloat(percentInput.value) || 0,
+                fixedAmount: parseFloat(fixedAmountInput.value) || 0
+            };
+            
+            saveSettings();
+            closeSettingsModal();
+            updateResult(); // Пересчитываем с новыми параметрами
+        }
+        
+        // Назначаем обработчики событий
+        amountInput.addEventListener('input', updateResult);
+        copyBtn.addEventListener('click', copyResultToClipboard);
+        settingsBtn.addEventListener('click', openSettingsModal);
+        closeModalBtn.addEventListener('click', closeSettingsModal);
+        saveSettingsBtn.addEventListener('click', saveNewSettings);
+        
+        // Закрываем модальное окно при клике вне его
+        window.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+        
+        // Загружаем настройки при запуске
+        loadSettings();
+    </script>
+</body>
+</html>

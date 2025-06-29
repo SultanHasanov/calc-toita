@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt Tracker - Учет долгов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #757575;
+            --text-color: #333;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-gray);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--secondary-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button.success {
+            background-color: var(--success-color);
+        }
+
+        button.success:hover {
+            background-color: #3d8b40;
+        }
+
+        button.warning {
+            background-color: var(--warning-color);
+        }
+
+        button.warning:hover {
+            background-color: #e68a00;
+        }
+
+        button.danger {
+            background-color: var(--danger-color);
+        }
+
+        button.danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--light-gray);
+        }
+
+        tr:hover {
+            background-color: #e8f4fd;
+        }
+
+        .paid {
+            background-color: rgba(76, 175, 80, 0.1) !important;
+            color: var(--success-color);
+        }
+
+        .unpaid {
+            background-color: rgba(117, 117, 117, 0.1) !important;
+            color: var(--dark-gray);
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .comments {
+            font-size: 12px;
+            color: var(--dark-gray);
+            margin-top: 5px;
+        }
+
+        .comment {
+            margin-bottom: 3px;
+            padding-left: 10px;
+            border-left: 2px solid var(--medium-gray);
+        }
+
+        .total {
+            font-weight: 700;
+            font-size: 18px;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: var(--dark-gray);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--text-color);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filter input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .no-debts {
+            text-align: center;
+            padding: 20px;
+            color: var(--dark-gray);
+            font-style: italic;
+        }
+
+        .person-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+        }
+
+        .person-details h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        .person-debts {
+            margin-top: 15px;
+        }
+
+        .person-debt {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: var(--white);
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .person-name {
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .person-name:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            th, td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions button {
+                width: 100%;
+            }
+        }
+          nav {
+      background: #f0f0f0;
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    </style>
+</head>
+<body>
+     <nav>
+    <a href="./index.html" onclick="navigate('home')">Главная</a> |
+    <a href="./dolgi.html" onclick="navigate('add')">Долги</a>
+  </nav>
+    <div class="container">
+        <h1><i class="fas fa-hand-holding-usd"></i> Учет долгов</h1>
+
+        <div class="form-group">
+            <h2>Добавить новый долг</h2>
+            <form id="debtForm">
+                <div class="form-group">
+                    <label for="name">Имя человека:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Сумма долга:</label>
+                    <input type="number" id="amount" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Описание (необязательно):</label>
+                    <textarea id="description" rows="2"></textarea>
+                </div>
+                <button type="submit" class="success"><i class="fas fa-plus"></i> Добавить долг</button>
+            </form>
+        </div>
+
+        <div class="search-filter">
+            <input type="text" id="searchInput" placeholder="Поиск по имени...">
+            <select id="statusFilter">
+                <option value="all">Все долги</option>
+                <option value="paid">Погашенные</option>
+                <option value="unpaid">Не погашенные</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table id="debtsTable">
+                <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Сумма долга</th>
+                        <th>Остаток</th>
+                    </tr>
+                </thead>
+                <tbody id="debtsTableBody">
+                    <!-- Данные будут загружены здесь -->
+                </tbody>
+            </table>
+            <div id="noDebtsMessage" class="no-debts">Нет данных о долгах</div>
+            <div class="total" id="totalDebt">Общая сумма долгов: 0 ₽</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для просмотра деталей человека -->
+    <div id="personModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="personDetails">
+                <!-- Детали будут загружены здесь -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для погашения долга -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Погашение долга</h2>
+            <form id="paymentForm">
+                <input type="hidden" id="debtId">
+                <div class="form-group">
+                    <label for="paymentAmount">Сумма платежа:</label>
+                    <input type="number" id="paymentAmount" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="paymentComment">Комментарий (необязательно):</label>
+                    <textarea id="paymentComment" rows="2"></textarea>
+                </div>
+                <button type="submit" class="success"><i class="fas fa-check"></i> Подтвердить платеж</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавления нового долга существующему человеку -->
+    <div id="newDebtModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Добавить новый долг для <span id="personName"></span></h2>
+            <form id="newDebtForm">
+                <input type="hidden" id="existingPersonId">
+                <div class="form-group">
+                    <label for="newDebtAmount">Сумма долга:</label>
+                    <input type="number" id="newDebtAmount" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="newDebtDescription">Описание (необязательно):</label>
+                    <textarea id="newDebtDescription" rows="2"></textarea>
+                </div>
+                <button type="submit" class="success"><i class="fas fa-plus"></i> Добавить долг</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_URL = 'https://6e09bbab65ebfe4c.mokky.dev/items';
+            let debts = [];
+            
+            // DOM элементы
+            const debtForm = document.getElementById('debtForm');
+            const debtsTableBody = document.getElementById('debtsTableBody');
+            const noDebtsMessage = document.getElementById('noDebtsMessage');
+            const personModal = document.getElementById('personModal');
+            const personDetails = document.getElementById('personDetails');
+            const paymentModal = document.getElementById('paymentModal');
+            const paymentForm = document.getElementById('paymentForm');
+            const newDebtModal = document.getElementById('newDebtModal');
+            const newDebtForm = document.getElementById('newDebtForm');
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const totalDebtElement = document.getElementById('totalDebt');
+            const closeButtons = document.querySelectorAll('.close');
+            
+            // Загрузка данных при загрузке страницы
+            loadDebts();
+            
+            // Обработчик формы добавления долга
+            debtForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value.trim();
+                const amount = parseFloat(document.getElementById('amount').value);
+                const description = document.getElementById('description').value.trim();
+                
+                const newDebt = {
+                    name,
+                    amount,
+                    remaining: amount,
+                    description,
+                    payments: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                addDebt(newDebt);
+            });
+            
+            // Обработчик формы погашения долга
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const debtId = document.getElementById('debtId').value;
+                const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+                const paymentComment = document.getElementById('paymentComment').value.trim();
+                
+                makePayment(debtId, paymentAmount, paymentComment);
+                paymentModal.style.display = 'none';
+            });
+            
+            // Обработчик формы добавления нового долга существующему человеку
+            newDebtForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const personId = document.getElementById('existingPersonId').value;
+                const amount = parseFloat(document.getElementById('newDebtAmount').value);
+                const description = document.getElementById('newDebtDescription').value.trim();
+                
+                addNewDebtToPerson(personId, amount, description);
+                newDebtModal.style.display = 'none';
+            });
+            
+            // Поиск и фильтрация
+            searchInput.addEventListener('input', filterDebts);
+            statusFilter.addEventListener('change', filterDebts);
+            
+            // Закрытие модальных окон
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    personModal.style.display = 'none';
+                    paymentModal.style.display = 'none';
+                    newDebtModal.style.display = 'none';
+                });
+            });
+            
+            // Закрытие модальных окон при клике вне их
+            window.addEventListener('click', function(event) {
+                if (event.target === personModal) {
+                    personModal.style.display = 'none';
+                }
+                if (event.target === paymentModal) {
+                    paymentModal.style.display = 'none';
+                }
+                if (event.target === newDebtModal) {
+                    newDebtModal.style.display = 'none';
+                }
+            });
+            
+            // Функция загрузки долгов
+            async function loadDebts() {
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error('Ошибка загрузки данных');
+                    
+                    debts = await response.json();
+                    renderDebts(debts);
+                    updateTotalDebt(debts);
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось загрузить данные о долгах');
+                }
+            }
+            
+            // Функция добавления долга
+            async function addDebt(debt) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(debt)
+                    });
+                    
+                    if (!response.ok) throw new Error('Ошибка добавления долга');
+                    
+                    const newDebt = await response.json();
+                    debts.push(newDebt);
+                    renderDebts(debts);
+                    updateTotalDebt(debts);
+                    
+                    // Очистка формы
+                    debtForm.reset();
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось добавить долг');
+                }
+            }
+            
+            // Функция погашения долга
+            async function makePayment(debtId, amount, comment) {
+                try {
+                    // Находим долг
+                    const debtIndex = debts.findIndex(d => d.id == debtId);
+                    if (debtIndex === -1) throw new Error('Долг не найден');
+                    
+                    const debt = debts[debtIndex];
+                    
+                    // Проверяем, что сумма платежа не превышает остаток
+                    if (amount > debt.remaining) {
+                        alert('Сумма платежа превышает остаток долга');
+                        return;
+                    }
+                    
+                    // Создаем запись о платеже
+                    const payment = {
+                        amount,
+                        comment,
+                        date: new Date().toISOString()
+                    };
+                    
+                    // Обновляем долг
+                    const updatedDebt = {
+                        ...debt,
+                        remaining: debt.remaining - amount,
+                        payments: [...debt.payments, payment]
+                    };
+                    
+                    // Отправляем на сервер
+                    const response = await fetch(`${API_URL}/${debtId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedDebt)
+                    });
+                    
+                    if (!response.ok) throw new Error('Ошибка обновления долга');
+                    
+                    // Обновляем локальные данные
+                    debts[debtIndex] = updatedDebt;
+                    renderDebts(debts);
+                    updateTotalDebt(debts);
+                    
+                    // Если открыто модальное окно с деталями, обновляем его
+                    if (personModal.style.display === 'block') {
+                        const currentPersonId = document.getElementById('existingPersonId').value;
+                        if (debtId === currentPersonId) {
+                            showPersonDetails(debtId);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось обработать платеж');
+                }
+            }
+            
+            // Функция добавления нового долга существующему человеку
+            async function addNewDebtToPerson(personId, amount, description) {
+                try {
+                    // Находим человека
+                    const personDebt = debts.find(d => d.id == personId);
+                    if (!personDebt) throw new Error('Человек не найден');
+                    
+                    // Создаем новый долг с тем же именем
+                    const newDebt = {
+                        name: personDebt.name,
+                        amount,
+                        remaining: amount,
+                        description,
+                        payments: [],
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    // Добавляем новый долг
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newDebt)
+                    });
+                    
+                    if (!response.ok) throw new Error('Ошибка добавления долга');
+                    
+                    const addedDebt = await response.json();
+                    debts.push(addedDebt);
+                    renderDebts(debts);
+                    updateTotalDebt(debts);
+                    
+                    // Обновляем модальное окно с деталями
+                    showPersonDetails(personId);
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось добавить новый долг');
+                }
+            }
+            
+            // Функция удаления долга
+            async function deleteDebt(debtId) {
+                if (!confirm('Вы уверены, что хотите удалить этот долг?')) return;
+                
+                try {
+                    const response = await fetch(`${API_URL}/${debtId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) throw new Error('Ошибка удаления долга');
+                    
+                    debts = debts.filter(d => d.id != debtId);
+                    renderDebts(debts);
+                    updateTotalDebt(debts);
+                    
+                    // Закрываем модальное окно, если оно открыто для этого долга
+                    if (personModal.style.display === 'block') {
+                        const currentPersonId = document.getElementById('existingPersonId').value;
+                        if (debtId === currentPersonId) {
+                            personModal.style.display = 'none';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось удалить долг');
+                }
+            }
+            
+            // Функция отображения долгов в таблице
+            function renderDebts(debtsToRender) {
+                debtsTableBody.innerHTML = '';
+                
+                if (debtsToRender.length === 0) {
+                    noDebtsMessage.style.display = 'block';
+                    return;
+                }
+                
+                noDebtsMessage.style.display = 'none';
+                
+                // Группируем долги по именам
+                const people = {};
+                debtsToRender.forEach(debt => {
+                    if (!people[debt.name]) {
+                        people[debt.name] = {
+                            totalAmount: 0,
+                            totalRemaining: 0,
+                            debts: []
+                        };
+                    }
+                    people[debt.name].totalAmount += debt.amount;
+                    people[debt.name].totalRemaining += debt.remaining;
+                    people[debt.name].debts.push(debt);
+                });
+                
+                // Сортируем имена по алфавиту
+                const sortedNames = Object.keys(people).sort();
+                
+                // Отображаем в таблице
+                sortedNames.forEach(name => {
+                    const person = people[name];
+                    const row = document.createElement('tr');
+                    row.className = person.totalRemaining === 0 ? 'paid' : 'unpaid';
+                    
+                    // Находим первый долг этого человека для получения id
+                    const firstDebtId = person.debts[0].id;
+                    
+                    row.innerHTML = `
+                        <td><span class="person-name" onclick="showPersonDetails('${firstDebtId}')">${name}</span></td>
+                        <td>${formatCurrency(person.totalAmount)}</td>
+                        <td>${formatCurrency(person.totalRemaining)}</td>
+                    `;
+                    
+                    debtsTableBody.appendChild(row);
+                });
+            }
+            
+            // Функция показа деталей человека
+            window.showPersonDetails = function(debtId) {
+                // Находим долг по id
+                const debt = debts.find(d => d.id == debtId);
+                if (!debt) return;
+                
+                // Находим все долги этого человека
+                const personDebts = debts.filter(d => d.name === debt.name);
+                
+                // Формируем HTML для отображения
+                let html = `
+                    <div class="person-details">
+                        <h3>${debt.name}</h3>
+                        <p><strong>Общая сумма долгов:</strong> ${formatCurrency(personDebts.reduce((sum, d) => sum + d.amount, 0))}</p>
+                        <p><strong>Общий остаток:</strong> ${formatCurrency(personDebts.reduce((sum, d) => sum + d.remaining, 0))}</p>
+                        
+                        <div class="person-debts">
+                            <h4>Долги:</h4>
+                `;
+                
+                personDebts.forEach(d => {
+                    html += `
+                        <div class="person-debt ${d.remaining === 0 ? 'paid' : 'unpaid'}">
+                            <p><strong>Сумма:</strong> ${formatCurrency(d.amount)}</p>
+                            <p><strong>Остаток:</strong> ${formatCurrency(d.remaining)}</p>
+                            ${d.description ? `<p><strong>Описание:</strong> ${d.description}</p>` : ''}
+                            
+                            <div class="actions">
+                                ${d.remaining > 0 ? `<button class="success" onclick="openPaymentModal('${d.id}', ${d.remaining})"><i class="fas fa-money-bill-wave"></i> Погасить</button>` : ''}
+                                <button class="danger" onclick="deleteDebt('${d.id}')"><i class="fas fa-trash"></i> Удалить</button>
+                            </div>
+                            
+                            ${d.payments && d.payments.length > 0 ? `
+                            <div class="comments">
+                                <p><strong>История платежей:</strong></p>
+                                ${d.payments.map(p => `
+                                    <div class="comment">
+                                        ${formatDate(new Date(p.date))}: Платеж ${formatCurrency(p.amount)}${p.comment ? ` (${p.comment})` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="warning" onclick="openNewDebtModal('${debtId}', '${debt.name}')"><i class="fas fa-plus-circle"></i> Добавить новый долг</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Сохраняем ID человека для использования в других функциях
+                document.getElementById('existingPersonId').value = debtId;
+                
+                // Отображаем модальное окно
+                personDetails.innerHTML = html;
+                personModal.style.display = 'block';
+            };
+            
+            // Функция фильтрации долгов
+            function filterDebts() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const status = statusFilter.value;
+                
+                let filteredDebts = debts.filter(debt => 
+                    debt.name.toLowerCase().includes(searchTerm)
+                );
+                
+                if (status === 'paid') {
+                    filteredDebts = filteredDebts.filter(debt => debt.remaining === 0);
+                } else if (status === 'unpaid') {
+                    filteredDebts = filteredDebts.filter(debt => debt.remaining > 0);
+                }
+                
+                renderDebts(filteredDebts);
+                updateTotalDebt(filteredDebts);
+            }
+            
+            // Функция обновления общей суммы долгов
+            function updateTotalDebt(debtsToCalculate) {
+                const total = debtsToCalculate.reduce((sum, debt) => sum + debt.remaining, 0);
+                totalDebtElement.textContent = `Общая сумма долгов: ${formatCurrency(total)}`;
+            }
+            
+            // Функция открытия модального окна для погашения долга
+            window.openPaymentModal = function(debtId, maxAmount) {
+                document.getElementById('debtId').value = debtId;
+                document.getElementById('paymentAmount').max = maxAmount;
+                document.getElementById('paymentAmount').value = maxAmount;
+                document.getElementById('paymentComment').value = '';
+                paymentModal.style.display = 'block';
+            };
+            
+            // Функция открытия модального окна для добавления нового долга
+            window.openNewDebtModal = function(personId, personName) {
+                document.getElementById('existingPersonId').value = personId;
+                document.getElementById('personName').textContent = personName;
+                document.getElementById('newDebtAmount').value = '';
+                document.getElementById('newDebtDescription').value = '';
+                newDebtModal.style.display = 'block';
+            };
+            
+            // Вспомогательные функции форматирования
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(amount);
+            }
+            
+            function formatDate(date) {
+                return new Intl.DateTimeFormat('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).format(date);
+            }
+            
+            // Глобальные функции для использования в onclick
+            window.deleteDebt = deleteDebt;
+        });
+    </script>
+</body>
+</html>

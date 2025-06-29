@@ -241,9 +241,28 @@
         font-size: 20px;
         color: #27ae60;
       }
+        nav {
+      background: #f0f0f0;
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
     </style>
   </head>
   <body>
+     <nav>
+    <a href="./index.html" onclick="navigate('home')">Главная</a> |
+    <a href="./dolgi.html" onclick="navigate('add')">Долги</a>
+  </nav>
     <div class="container">
       <h1>Калькулятор</h1>
 
